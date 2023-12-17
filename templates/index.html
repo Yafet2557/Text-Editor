@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Editor App</title>
+</head>
+<body>
+    <div>
+        <h1>World's Best Text Editor</h1>
+        <label for="fileInput">Select a File:</label>
+        <input type="file" id="fileInput" multiple>
+        <br/>
+        <br/>
+        <label for="fileDropdown">Files:</label>
+        <select id="fileDropdown"></select>
+        <br/>
+        <br/>
+        <textarea id="editorTextArea" rows="25" cols="100"></textarea>
+        <br/>
+        <button id="SaveButton" title="Save current file" type="button">Save</button>
+        <button id="SaveAsButton" type="button" title="Save as a new file">Save As</button>
+        <button id="SaveAsConfirm" type="button" title="Confirm and save the new file">Confirm</button>
+        <div>Character Count: <span id="CharCount">0</span></div>
+        <div id="statusMessage"></div>
+        <div id="ErrorMessage"></div>
+    </div>
+</body>
+</html>
