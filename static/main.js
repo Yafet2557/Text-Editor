@@ -5,8 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const editorTextArea = document.getElementById('editorTextArea');
     const charCount = document.getElementById('CharCount');
     const fileDropdown = document.getElementById('fileDropdown');
-
-
+    const saveButton = document.getElementById('SaveButton');
 
     // Event listener for file input, handling file selection
     fileInput.addEventListener('change', function () {
@@ -34,8 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
+    // Event listener to update character count when changing
     editorTextArea.addEventListener('input', function(){
         charCount.textContent = editorTextArea.value.length;
+        saveButton.disabled = false;
     });
 
     // Function to make a POST request to load file content
@@ -60,4 +61,38 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
     }
+
+    function saveContent(fileName, content){
+        fetch('/save_file', {
+            method:'POST',
+            body: new URLSearchParams({
+                'file_name': fileName,
+                'file_content': content,
+            }),
+            headers:{
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.error)
+            {
+                errorMessage.textContent = data.error;
+            }
+            else
+            {
+                errorMessage.textContent = 'File saved successfully';
+                saveButton.disabled = true;
+            }
+        })
+    }
+
+    saveButton.addEventListener('click', function(){
+       const filename = fileDropdown.value;
+       const content = editorTextArea.value;
+
+       saveContent(filename, content);
+    });
+
+    saveButton.disabled = true;
 });
