@@ -22,30 +22,42 @@ document.addEventListener("DOMContentLoaded", function () {
             option.value = filePath;
             option.text = filePath;
             fileDropdown.add(option);
+            // Call function to load file content
+            loadFileContent(filePath);
+        }
+    });
 
-            // Make post request to server
-            fetch('/load_file', {
-                method: 'POST',
-                body: new URLSearchParams({ 'file_name': filePath }),  // Use 'file_name' instead of 'file_path'
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-            })
+    // Event listener to display file content of selected file from dropdown
+    fileDropdown.addEventListener('change', function () {
+        const file = fileDropdown.value;
+        loadFileContent(file);
+
+    });
+
+    editorTextArea.addEventListener('input', function(){
+        charCount.textContent = editorTextArea.value.length;
+    });
+
+    // Function to make a POST request to load file content
+    function loadFileContent(fileName) {
+        fetch('/load_file', {
+            method: 'POST',
+            body: new URLSearchParams({ 'file_name': fileName }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        })
             .then(response => response.json())
             .then(data => {
                 // Handle server response
                 if (data.error) {
                     errorMessage.textContent = data.error;
                 } else {
-                    // Update UI with file content
+                    // Update the text area with the content of the selected file
                     editorTextArea.value = data.content;
                     charCount.textContent = editorTextArea.value.length;
                     errorMessage.textContent = '';
                 }
             });
-        } else {
-            // Display error if no file is selected
-            errorMessage.textContent = 'No file selected';
-        }
-    });
+    }
 });
