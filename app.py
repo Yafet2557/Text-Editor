@@ -30,5 +30,21 @@ def load_file():
         # If file is not found
         return jsonify({'error': 'File not found'})
     
+@app.route('/save_file', methods=['POST'])
+def save_file():
+    file_name = request.form.get('file_name') # Get the file name
+    file_content = request.form.get('file_content') # And file content
+
+    try:
+        # Open file for writing
+        with open(file_name, 'w') as file:
+            # Write content to file
+            file.write(file_content)
+            # Return json response
+            return jsonify({'success':True})
+    except Exception as e:
+        # 
+        return jsonify({'error':f'Error saving file {str(e)}'})
+    
 if __name__ == '__main__':
     app.run(debug=True)
