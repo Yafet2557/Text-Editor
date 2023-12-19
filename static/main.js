@@ -4,8 +4,12 @@
  * It initializes references to HTML elements, sets initial states,
  * and attaches event listeners for file input, dropdown, and buttons.
  */
-document.addEventListener("DOMContentLoaded", function () {
-    // Reference to HTML elements
+document.addEventListener("DOMContentLoaded", initializeTextEditor);
+
+/**
+ * Function to initialize the text editor when the DOM is ready.
+ */
+function initializeTextEditor() {
     const fileInput = document.getElementById('fileInput');
     const errorMessage = document.getElementById('ErrorMessage');
     const editorTextArea = document.getElementById('editorTextArea');
@@ -16,62 +20,75 @@ document.addEventListener("DOMContentLoaded", function () {
     const new_file = document.getElementById('new_file');
     const saveAsConfirm = document.getElementById('SaveAsConfirm');
 
-    // Disable buttons and fields to start with
-    saveButton.disabled = true;
-    saveAsButton.disabled = true;
-    new_file.hidden = true;
-    saveAsConfirm.disabled = true;
+    setInitialStates();
 
-    /**
-     * Event Listener for File Input
-     * Handles file selection and triggers appropriate actions.
-     */
     fileInput.addEventListener('change', handleFileSelection);
 
-    /**
-     * Event Listener for Dropdown Change
-     * Displays the content of the selected file from the dropdown.
-     */
-    fileDropdown.addEventListener('change', function () {
-        const file = fileDropdown.value;
-        loadFileContent(file);
-    });
+    fileDropdown.addEventListener('change', handleDropdownChange);
+
+    editorTextArea.addEventListener('input', handleEditorInput);
+
+    saveButton.addEventListener('click', handleSaveButtonClick);
+
+    saveAsButton.addEventListener('click', handleSaveAsButtonClick);
+
+    saveAsConfirm.addEventListener('click', handleSaveAsConfirmClick);
 
     /**
-     * Event Listener for Editor Text Area Input
+     * Function to set initial states of buttons and fields.
+     */
+    function setInitialStates() {
+        // Disable buttons and fields to start with
+        saveButton.disabled = true;
+        saveAsButton.disabled = true;
+        new_file.hidden = true;
+        saveAsConfirm.disabled = true;
+    }
+
+    /**
+     * Event Handler for Dropdown Change
+     * Loads and displays the content of the selected file from the dropdown.
+     */
+    function handleDropdownChange() {
+        const file = fileDropdown.value;
+        loadFileContent(file);
+    }
+
+    /**
+     * Event Handler for Editor Text Area Input
      * Updates the character count and enables save buttons when the content changes.
      */
-    editorTextArea.addEventListener('input', function () {
+    function handleEditorInput() {
         charCount.textContent = editorTextArea.value.length;
         saveButton.disabled = false;
         saveAsButton.disabled = false;
-    });
+    }
 
     /**
-     * Event Listener for Save Button
+     * Event Handler for Save Button
      * Saves the content of the editor to the selected file.
      */
-    saveButton.addEventListener('click', function () {
+    function handleSaveButtonClick() {
         const filename = fileDropdown.value;
         const content = editorTextArea.value;
         saveContent(filename, content);
-    });
+    }
 
     /**
-     * Event Listener for Save As Button
+     * Event Handler for Save As Button
      * Displays the new file input and save confirmation button.
      */
-    saveAsButton.addEventListener('click', function () {
+    function handleSaveAsButtonClick() {
         new_file.hidden = false;
         saveAsConfirm.disabled = false;
-    });
+    }
 
     /**
-     * Event Listener for Save As Confirmation Button
+     * Event Handler for Save As Confirmation Button
      * Saves the content to the new file, adds it to the dropdown,
      * and handles UI states accordingly.
      */
-    saveAsConfirm.addEventListener('click', function () {
+    function handleSaveAsConfirmClick() {
         const newFileName = new_file.value;
         const content = editorTextArea.value;
 
@@ -92,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
         new_file.hidden = true;
         saveAsConfirm.disabled = true;
         saveAsButton.disabled = true;
-    });
+    }
 
     /**
      * Function to make a POST request to load file content
@@ -155,7 +172,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const selectedFile = fileInput.files[0];
 
         if (selectedFile) {
-            // Determine the file path to be sent to the server
             const filePath = selectedFile.webkitRelativePath || selectedFile.name;
 
             if (!fileExist(filePath, fileDropdown)) {
@@ -189,4 +205,4 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         return false;
     }
-});
+}
