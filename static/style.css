@@ -1,0 +1,11 @@
+/* style.css */
+
+body {
+    background-image: url('/static/pic2.jpg');
+    color: white;
+}
+
+.modal-content{
+    background-color: black;
+    color: #fff;
+}
