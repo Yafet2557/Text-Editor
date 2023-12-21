@@ -11,8 +11,6 @@ document.addEventListener("DOMContentLoaded", initializeTextEditor);
  */
 function initializeTextEditor() {
     const fileInput = document.getElementById('fileInput');
-    const errorMessage = document.getElementById('ErrorMessage');
-    const editorTextArea = document.getElementById('editorTextArea');
     const charCount = document.getElementById('CharCount');
     const fileDropdown = document.getElementById('fileDropdown');
     const saveButton = document.getElementById('SaveButton');
@@ -101,7 +99,7 @@ function initializeTextEditor() {
             option.selected = true;
             option.value = newFileName;
         } else {
-            errorMessage.textContent = "File already exists in the dropdown.";
+            DisplayError("File already exist in the dropdown.");
         }
 
         // Reset and hide the new file input
@@ -127,13 +125,16 @@ function initializeTextEditor() {
             .then(data => {
                 // Handle server response
                 if (data.error) {
-                    errorMessage.textContent = data.error;
+                    DisplayError(data.error);
+
                 } else {
                     // Update the text area with the content of the selected file
                     editorTextArea.value = data.content;
                     charCount.textContent = editorTextArea.value.length;
-                    errorMessage.textContent = '';
                 }
+            })
+            .catch(error => {
+              DisplayError(error.message || 'An error occurred.') 
             });
     }
 
@@ -156,11 +157,14 @@ function initializeTextEditor() {
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    errorMessage.textContent = data.error;
+                    DisplayError(data.error);
+
                 } else {
-                    errorMessage.textContent = 'File saved successfully!!!';
                     saveButton.disabled = true;
                 }
+            })
+            .catch(error =>{
+                DisplayError(error.message || 'An error occurred.');
             });
     }
 
@@ -184,7 +188,7 @@ function initializeTextEditor() {
                 // Call function to load file content
                 loadFileContent(filePath);
             } else {
-                errorMessage.textContent = "File already exists in the dropdown.";
+                DisplayError("File already exists in the dropdown.");
             }
         } else {
             console.log("No file selected.");
@@ -204,5 +208,13 @@ function initializeTextEditor() {
             }
         }
         return false;
+    }
+
+    function DisplayError(message)
+    {
+        const modalErrorMessage = document.getElementById('modalErrorMessage');
+        modalErrorMessage.textContent = message;
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
     }
 }
