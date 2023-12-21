@@ -10,7 +10,7 @@ def index():
     return render_template('index.html')
 
 # Route for loading file content
-@app.route('/load_file', methods=['POST'])
+@app.route('/load_file', methods=['POST', 'GET'])
 def load_file():
     
     # Get the file name from the form data in the POST request
@@ -29,7 +29,7 @@ def load_file():
         logging.error(f'Error loading file: {str(e)}')
         return jsonify({'error': 'File not found'})
     
-@app.route('/save_file', methods=['POST'])
+@app.route('/save_file', methods=['POST', 'GET'])
 def save_file():
     file_name = request.form.get('file_name') # Get the file name
     file_content = request.form.get('file_content') # And file content
