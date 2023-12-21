@@ -18,7 +18,6 @@ def load_file():
     # Get absolute path to file
     file_path = os.path.join(os.getcwd(), file_name)
    
-    print("File path:", file_path)
     try:
         # Open file for reading
         with open(file_path, 'r') as file:
