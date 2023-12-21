@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-import os
+import os, logging
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -26,8 +26,8 @@ def load_file():
             content = file.read()
             # Return as JSON response
             return jsonify({'content': content})
-    except FileNotFoundError:
-        # If file is not found
+    except FileNotFoundError as e:
+        logging.error(f'Error loading file: {str(e)}')
         return jsonify({'error': 'File not found'})
     
 @app.route('/save_file', methods=['POST'])
@@ -43,7 +43,7 @@ def save_file():
             # Return json response
             return jsonify({'success':True})
     except Exception as e:
-        # 
+        logging.error(f'Error saving file: {str(e)}')
         return jsonify({'error':f'Error saving file {str(e)}'})
     
 if __name__ == '__main__':
