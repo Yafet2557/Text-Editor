@@ -46,4 +46,4 @@ def save_file():
         return jsonify({'error':f'Error saving file {str(e)}'})
     
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, host='0.0.0.0')
