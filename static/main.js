@@ -10,27 +10,18 @@ document.addEventListener("DOMContentLoaded", initializeTextEditor);
  * Function to initialize the text editor when the DOM is ready.
  */
 function initializeTextEditor() {
-    const fileInput = document.getElementById('fileInput');
+    // References to HTML elements
     const charCount = document.getElementById('CharCount');
     const fileDropdown = document.getElementById('fileDropdown');
     const saveButton = document.getElementById('SaveButton');
     const saveAsButton = document.getElementById('SaveAsButton');
-    const new_file = document.getElementById('new_file');
-    const saveAsConfirm = document.getElementById('SaveAsConfirm');
-
     setInitialStates();
 
-    fileInput.addEventListener('change', handleFileSelection);
-
+    // Event listeners
     fileDropdown.addEventListener('change', handleDropdownChange);
-
     editorTextArea.addEventListener('input', handleEditorInput);
-
     saveButton.addEventListener('click', handleSaveButtonClick);
-
     saveAsButton.addEventListener('click', handleSaveAsButtonClick);
-
-    saveAsConfirm.addEventListener('click', handleSaveAsConfirmClick);
 
     /**
      * Function to set initial states of buttons and fields.
@@ -39,8 +30,6 @@ function initializeTextEditor() {
         // Disable buttons and fields to start with
         saveButton.disabled = true;
         saveAsButton.disabled = true;
-        new_file.hidden = true;
-        saveAsConfirm.disabled = true;
     }
 
     /**
@@ -67,7 +56,22 @@ function initializeTextEditor() {
      * Saves the content of the editor to the selected file.
      */
     function handleSaveButtonClick() {
-        const filename = fileDropdown.value;
+        var filename = fileDropdown.value.trim(); // Trim to remove leading/trailing spaces
+
+        if (!filename) {
+            filename = prompt('Enter a file name:').trim();
+            if (!filename) {
+                return; // User canceled or entered an empty string
+            }
+            addFileToDropdown(filename);
+        }
+
+        // Validate filename to prevent injection
+        if (!isValidFilename(filename)) {
+            DisplayError('Invalid filename. Please use alphanumeric characters and underscores.');
+            return;
+        }
+
         const content = editorTextArea.value;
         saveContent(filename, content);
     }
@@ -77,121 +81,30 @@ function initializeTextEditor() {
      * Displays the new file input and save confirmation button.
      */
     function handleSaveAsButtonClick() {
-        new_file.hidden = false;
-        saveAsConfirm.disabled = false;
-    }
-
-    /**
-     * Event Handler for Save As Confirmation Button
-     * Saves the content to the new file, adds it to the dropdown,
-     * and handles UI states accordingly.
-     */
-    function handleSaveAsConfirmClick() {
-        const newFileName = new_file.value;
+        var filename = prompt('Enter a new filename: ');
         const content = editorTextArea.value;
 
-        saveContent(newFileName, content);
+        if (filename) {
+            addFileToDropdown(filename);
+            saveContent(filename, content);
+        }
+    }
 
-        if (!fileExist(newFileName, fileDropdown)) {
+    /**
+     * Function to add a new file to the dropdown if it doesn't already exist.
+     * @param {string} fileName - The name of the file to add.
+     */
+    function addFileToDropdown(fileName) {
+        // Check if the file already exists in the dropdown
+        if (!fileExist(fileName, fileDropdown)) {
             const option = document.createElement('option');
-            option.text = newFileName;
+            option.text = fileName;
             fileDropdown.add(option);
             option.selected = true;
-            option.value = newFileName;
+            option.value = fileName;
         } else {
-            DisplayError("File already exist in the dropdown.");
-        }
-
-        // Reset and hide the new file input
-        new_file.value = '';
-        new_file.hidden = true;
-        saveAsConfirm.disabled = true;
-        saveAsButton.disabled = true;
-    }
-
-    /**
-     * Function to make a POST request to load file content
-     * @param {string} fileName - The name of the file to load.
-     */
-    function loadFileContent(fileName) {
-        fetch('/load_file', {
-            method: 'POST',
-            body: new URLSearchParams({ 'file_name': fileName }),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        })
-            .then(response => response.json())
-            .then(data => {
-                // Handle server response
-                if (data.error) {
-                    DisplayError(data.error);
-
-                } else {
-                    // Update the text area with the content of the selected file
-                    editorTextArea.value = data.content;
-                    charCount.textContent = editorTextArea.value.length;
-                }
-            })
-            .catch(error => {
-              DisplayError(error.message || 'An error occurred.') 
-            });
-    }
-
-    /**
-     * Function to make a POST request to save file content
-     * @param {string} fileName - The name of the file to save.
-     * @param {string} content - The content to be saved.
-     */
-    function saveContent(fileName, content) {
-        fetch('/save_file', {
-            method: 'POST',
-            body: new URLSearchParams({
-                'file_name': fileName,
-                'file_content': content,
-            }),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    DisplayError(data.error);
-
-                } else {
-                    saveButton.disabled = true;
-                }
-            })
-            .catch(error =>{
-                DisplayError(error.message || 'An error occurred.');
-            });
-    }
-
-    /**
-     * Function to handle file selection
-     * Gets selected files, determines the file path, and adds it to the dropdown.
-     */
-    function handleFileSelection() {
-        const selectedFile = fileInput.files[0];
-
-        if (selectedFile) {
-            const filePath = selectedFile.webkitRelativePath || selectedFile.name;
-
-            if (!fileExist(filePath, fileDropdown)) {
-                const option = document.createElement('option');
-                option.text = filePath;
-                fileDropdown.add(option);
-                option.selected = true;
-                option.value = filePath;
-
-                // Call function to load file content
-                loadFileContent(filePath);
-            } else {
-                DisplayError("File already exists in the dropdown.");
-            }
-        } else {
-            console.log("No file selected.");
+            // Optionally, you can provide feedback to the user that the file already exists.
+            alert("File already exists in the dropdown.");
         }
     }
 
@@ -210,11 +123,85 @@ function initializeTextEditor() {
         return false;
     }
 
-    function DisplayError(message)
-    {
+    /**
+     * Function to make a POST request to load file content
+     * @param {string} fileName - The name of the file to load.
+     */
+    function loadFileContent(fileName) {
+        fetch('/load_file', {
+            method: 'POST',
+            body: new URLSearchParams({ 'file_name': fileName }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        })
+        .then(response => response.json())
+        .then(handleLoadResponse)
+        .catch(handleError);
+    }
+
+    /**
+     * Function to handle the response after loading file content
+     * @param {Object} data - The response data.
+     */
+    function handleLoadResponse(data) {
+        if (data.error) {
+            DisplayError(data.error);
+        } else {
+            // Update the text area with the content of the selected file
+            editorTextArea.value = data.content;
+            charCount.textContent = editorTextArea.value.length;
+        }
+    }
+
+    /**
+     * Function to make a POST request to save file content
+     * @param {string} fileName - The name of the file to save.
+     * @param {string} content - The content to be saved.
+     */
+    function saveContent(fileName, content) {
+        fetch('/save_file', {
+            method: 'POST',
+            body: new URLSearchParams({
+                'file_name': fileName,
+                'file_content': content,
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        })
+        .then(response => response.json())
+        .then(handleSaveResponse)
+        .catch(handleError);
+    }
+
+    /**
+     * Function to handle the response after saving file content
+     * @param {Object} data - The response data.
+     */
+    function handleSaveResponse(data) {
+        if (data.error) {
+            DisplayError(data.error);
+        } else {
+            saveButton.disabled = true;
+        }
+    }
+
+    /**
+     * Function to handle errors
+     * @param {Error} error - The error object.
+     */
+    function handleError(error) {
+        DisplayError(error.message || 'An error occurred.');
+    }
+
+    /**
+     * Function to display an error message in a modal.
+     * @param {string} message - The error message to display.
+     */
+    function DisplayError(message) {
         const modalErrorMessage = document.getElementById('modalErrorMessage');
         modalErrorMessage.textContent = message;
-        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
         errorModal.show();
     }
 }
