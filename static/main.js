@@ -16,12 +16,15 @@ function initializeTextEditor() {
     const saveButton = document.getElementById('SaveButton');
     const saveAsButton = document.getElementById('SaveAsButton');
     setInitialStates();
+    const downloadButton = document.getElementById('DownloadButton');
+    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
 
     // Event listeners
     fileDropdown.addEventListener('change', handleDropdownChange);
     editorTextArea.addEventListener('input', handleEditorInput);
     saveButton.addEventListener('click', handleSaveButtonClick);
     saveAsButton.addEventListener('click', handleSaveAsButtonClick);
+    downloadButton.addEventListener('click', handleDownloadButtonClick);
 
     /**
      * Function to set initial states of buttons and fields.
@@ -91,6 +94,48 @@ function initializeTextEditor() {
     }
 
     /**
+  * Event Handler for Download Button
+  * Downloads the content of the editor as a text file.
+  */
+    function handleDownloadButtonClick() {
+        // Get the content of the editor
+        const editorContent = editorTextArea.value;
+
+        // Check if the content is empty
+        if (!editorContent) {
+            // Display an alert if the content is empty
+            DisplayError('Cannot download an empty file.');
+            return;
+        }
+
+        // Create a Blob (binary large object) containing the content as a text file
+        var textBlob = new Blob([editorContent], { type: 'text/plain' });
+
+        // Create a temporary link element
+        var downloadLink = document.createElement('a');
+
+        // Set the link's href to a URL representing the Blob
+        downloadLink.href = URL.createObjectURL(textBlob);
+
+        // Get the filename from the file dropdown, or use 'untitled.txt' if not available
+        var fileName = fileDropdown.value || 'untitled.txt';
+
+        // Set the download attribute with the filename
+        downloadLink.download = fileName;
+
+        // Append the link to the document body
+        document.body.appendChild(downloadLink);
+
+        // Trigger a click event on the link, initiating the download
+        downloadLink.click();
+
+        // Remove the link from the document body
+        document.body.removeChild(downloadLink);
+    }
+
+
+
+    /**
      * Function to add a new file to the dropdown if it doesn't already exist.
      * @param {string} fileName - The name of the file to add.
      */
@@ -135,9 +180,9 @@ function initializeTextEditor() {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
         })
-        .then(response => response.json())
-        .then(handleLoadResponse)
-        .catch(handleError);
+            .then(response => response.json())
+            .then(handleLoadResponse)
+            .catch(handleError);
     }
 
     /**
@@ -170,9 +215,9 @@ function initializeTextEditor() {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
         })
-        .then(response => response.json())
-        .then(handleSaveResponse)
-        .catch(handleError);
+            .then(response => response.json())
+            .then(handleSaveResponse)
+            .catch(handleError);
     }
 
     /**
