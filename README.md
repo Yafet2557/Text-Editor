@@ -21,3 +21,12 @@ The Text Editor App is a simple web-based text editor that allows users to creat
 - **Additional Functionality:**
   - Save As: Save the current content as a new file.
   - Download: Download the current content as a text file.
+
+  ## Technologies Used
+
+- **Backend:** Flask (Python)
+- **Frontend:** HTML, CSS (with Bootstrap), JavaScript
+- **Dependencies:** Bootstrap, Popper.js, Bootstrap.js
+- **Communication:** Fetch API
+- **Development Environment:** VSCode
+- **Version Control:** Git
